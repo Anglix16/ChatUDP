@@ -19,6 +19,7 @@ public class ClienteUDP {
 
     private static final String IP_SERVIDOR = "127.0.0.1";
     private static final int PUERTO_SERVIDOR = 12345;
+    private static final int PUERTO_CLIENTE = 12346; // Cambiar el puerto de recepción
 
     public ClienteUDP() {
         btnEnviar.addActionListener(new ActionListener() {
@@ -33,7 +34,7 @@ public class ClienteUDP {
 
         Thread receiverThread = new Thread(() -> {
             try {
-                DatagramSocket socket = new DatagramSocket();
+                DatagramSocket socket = new DatagramSocket(PUERTO_CLIENTE); // Usar un puerto diferente para la recepción
 
                 while (true) {
                     byte[] buffer = new byte[1024];
