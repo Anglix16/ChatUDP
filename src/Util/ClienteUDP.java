@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.Random;
 
 public class ClienteUDP {
     private JPanel JPPrincipal;
@@ -18,14 +19,19 @@ public class ClienteUDP {
     private JLabel lblMensaje2;
 
     private static final String IP_SERVIDOR = "127.0.0.1";
-    private static final int PUERTO_SERVIDOR = 12345;
-    private static final int PUERTO_CLIENTE = 12346; // Cambiar el puerto de recepción
+    private static final int PUERTO_SERVIDOR = 12345; // Puerto del servidor
 
     public ClienteUDP() {
+        // Generar un nombre de cliente aleatorio
+        Random random = new Random();
+        String nombreCliente = "Cliente" + random.nextInt(1000);
+
+
+
         btnEnviar.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String mensaje = tfMensaje.getText();
+                String mensaje = nombreCliente + ": " + tfMensaje.getText();
                 enviarMensaje(mensaje);
                 tfMensaje.setText("");
                 appendToCliente(mensaje); // Agregar mensaje enviado al JTextPane de la izquierda
@@ -34,7 +40,7 @@ public class ClienteUDP {
 
         Thread receiverThread = new Thread(() -> {
             try {
-                DatagramSocket socket = new DatagramSocket(PUERTO_CLIENTE); // Usar un puerto diferente para la recepción
+                DatagramSocket socket = new DatagramSocket(); // Usar un puerto aleatorio para el cliente
 
                 while (true) {
                     byte[] buffer = new byte[1024];
@@ -42,6 +48,7 @@ public class ClienteUDP {
                     socket.receive(paquete);
 
                     String recibido = new String(paquete.getData(), 0, paquete.getLength());
+                    System.out.println("Mensaje recibido del servidor: " + recibido); // Mensaje de depuración
                     appendToServidor(recibido); // Agregar mensaje recibido al JTextPane de la derecha
                 }
             } catch (IOException e) {
@@ -59,19 +66,23 @@ public class ClienteUDP {
             DatagramPacket paquete = new DatagramPacket(buffer, buffer.length,
                     InetAddress.getByName(IP_SERVIDOR), PUERTO_SERVIDOR);
             socket.send(paquete);
+            System.out.println("Enviando mensaje al servidor: " + mensaje);
+
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     private void appendToServidor(String mensaje) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                taServidor.setText(taServidor.getText() + mensaje + "\n");
-            }
+        SwingUtilities.invokeLater(() -> {
+            taServidor.setText(taServidor.getText() + mensaje + "\n");
+            System.out.println("Texto actual del JTextPane taServidor: " + taServidor.getText());
+
         });
+        System.out.println("Texto actual del JTextPane taServidor: " + taServidor.getText());
+
     }
+
 
     private void appendToCliente(String mensaje) {
         SwingUtilities.invokeLater(new Runnable() {
